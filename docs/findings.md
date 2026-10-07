@@ -21,3 +21,11 @@
 - **What:** Signup accepts "abcdef", "123456", "password" and "qwerty123". The only rule enforced is length, 6 to 100 characters.
 - **Risk:** Weak passwords are easy to guess, so an attacker can get into accounts by brute force or credential stuffing. Severity: Medium
 - **Fix:** Enforce a minimum length and reject passwords found on a list of known common passwords (such as "123456" and "password").
+
+## Finding 4: Users able to access another user's orders (BOLA)
+- **Test:** test_bola_cannot_read_other_users_data (xfail)
+- **What:** User B is able to access User A's order id. API used : GET /workshop/api/shop/orders/<id>
+- **Risk:** The reply includes email, phone number, transaction id, payment details etc. which are sensitive user data. The order id are sequential and attacker can collect the information on all the customers.
+- **Fix:** Check on the server that the order belongs to the requesting user (return 403 or 404 otherwise). 
+Optionally use non-guessable ids (UUIDs) as a second layer. The xfail test turns into XPASS(strict) once fixed, which tells us to remove the marker.
+- **Severity:** High

@@ -8,10 +8,24 @@ import pytest
 pytestmark = pytest.mark.security
 
 
-@pytest.mark.skip(reason="TODO (you): API1 BOLA - can user A read user B's resource by changing an ID?")
-def test_bola_cannot_read_other_users_data(auth_client):
-    """Needs two registered users. Fetch a resource ID as user A, request it as user B."""
+def test_second_client_is_a_different_user(auth_client,second_auth_client):
+    user_a = auth_client.dashboard()
+    user_b = second_auth_client.dashboard()
+    assert user_a.status_code == 200
+    assert user_b.status_code == 200
+    assert auth_client.token != second_auth_client.token
+    assert user_a.json()["email"] != user_b.json()["email"]
 
+@pytest.mark.xfail(strict=True,raises=AssertionError,
+                   reason="BOLA: any logged-in user can read another user's order (PII + Payment details)")
+def test_bola_cannot_read_other_users_data(auth_client,second_auth_client):
+    """Needs two registered users. Fetch a resource ID as user A, request it as user B."""
+    created = auth_client.post("/workshop/api/shop/orders", json={"product_id": 2, "quantity": 1})
+    order_id = created.json()["id"]
+    response_a = auth_client.get(f"/workshop/api/shop/orders/{order_id}")
+    assert response_a.status_code == 200
+    response_b = second_auth_client.get(f"/workshop/api/shop/orders/{order_id}")
+    assert response_b.status_code in (400, 401, 403, 404), f"Second user was able to access the order id {order_id}, which is First User order"
 
 @pytest.mark.skip(reason="TODO (you): API2 Broken authentication - token handling, lockout, weak reset flow")
 def test_repeated_failed_logins_are_limited(anon_client, registered_user):

@@ -52,3 +52,13 @@ def auth_client(settings, registered_user):
     assert client.token, "Login response had no token field - check the response shape"
     yield client
     client.close()
+
+
+@pytest.fixture
+def second_auth_client(settings):
+    user = new_user()
+    client = ApiClient(settings)
+    client.signup(user["name"], user["email"], user["number"], user["password"])
+    token = client.login(user["email"], user["password"]).json()["token"]
+    client.token = token
+    return client
