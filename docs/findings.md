@@ -29,3 +29,15 @@
 - **Fix:** Check on the server that the order belongs to the requesting user (return 403 or 404 otherwise). 
 Optionally use non-guessable ids (UUIDs) as a second layer. The xfail test turns into XPASS(strict) once fixed, which tells us to remove the marker.
 - **Severity:** High
+
+## Finding 5: Excessive data exposure in Community posts
+- **Test:** test_responses_do_not_leak_sensitive_fields (xfail)
+- **What:** The community posts API returns each author's email and vehicle id to any
+  logged-in user, although the page only needs the nickname and picture.
+  API: GET /community/api/v2/community/posts/recent (params: limit, offset)
+- **Risk:** An attacker can collect the emails of all forum authors for phishing or spam.
+  The vehicle id is an identifier used by other endpoints, so it helps target a specific
+  user.
+- **Fix:** Return only what the UI needs in the author object (nickname, profile picture).
+  Never include email or vehicle id in public responses.
+- **Severity:** Medium

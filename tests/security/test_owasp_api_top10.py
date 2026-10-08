@@ -31,10 +31,14 @@ def test_bola_cannot_read_other_users_data(auth_client,second_auth_client):
 def test_repeated_failed_logins_are_limited(anon_client, registered_user):
     """Send N wrong-password logins. Does the app ever slow down or lock?"""
 
-
-@pytest.mark.skip(reason="TODO (you): API3 Excessive data exposure - do responses leak fields the UI never shows?")
+@pytest.mark.xfail(strict=True,raises=AssertionError,reason="Excessive Data Exposure: community posts author email and vehicleid to any user")
 def test_responses_do_not_leak_sensitive_fields(auth_client):
     """Inspect dashboard and other responses for password hashes, internal IDs, tokens."""
+    response = auth_client.get("/community/api/v2/community/posts/recent",params={"limit": 30, "offset": 0})
+    assert response.status_code == 200
+    assert "nickname" in response.text, f"Nickname of the Author not observed"
+    assert "email" not in response.text, f"Author email is exposed in community posts"
+    assert "vehicleid" not in response.text, f"Author vehicle id is exposed in community posts"
 
 
 @pytest.mark.skip(reason="TODO (you): API4 Resource consumption - missing rate limits or size limits")
