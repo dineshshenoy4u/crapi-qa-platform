@@ -53,9 +53,9 @@ def test_responses_do_not_leak_sensitive_fields(auth_client):
     """Inspect dashboard and other responses for password hashes, internal IDs, tokens."""
     response = auth_client.get("/community/api/v2/community/posts/recent",params={"limit": 30, "offset": 0})
     assert response.status_code == 200
-    assert "nickname" in response.text, f"Nickname of the Author not observed"
-    assert "email" not in response.text, f"Author email is exposed in community posts"
-    assert "vehicleid" not in response.text, f"Author vehicle id is exposed in community posts"
+    assert "nickname" in response.text, "Nickname of the Author not observed"
+    assert "email" not in response.text, "Author email is exposed in community posts"
+    assert "vehicleid" not in response.text, "Author vehicle id is exposed in community posts"
 
 
 def test_oversized_payload_is_rejected(anon_client):

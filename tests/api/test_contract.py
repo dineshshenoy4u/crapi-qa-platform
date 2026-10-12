@@ -1,5 +1,4 @@
 """Schema/contract checks with pydantic: assert the response SHAPE, not just a status code."""
-import pytest
 from pydantic import BaseModel
 
 

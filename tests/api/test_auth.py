@@ -1,4 +1,5 @@
 import pytest
+
 from framework import data
 
 pytestmark = pytest.mark.auth
