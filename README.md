@@ -10,7 +10,8 @@ New here? Read `START_HERE.md` first, then `docs/roadmap.md` for all six phases.
 framework/      config, API client, test data helpers
 tests/api/      smoke, auth, negative, contract tests
 tests/security/ OWASP API Top 10 style checks
-docs/           Docker setup and the Phase 1 checklist
+docs/           Docker setup, Phase 1 checklist, roadmap, security findings
+.github/        GitHub Actions lint check (ruff)
 Jenkinsfile     skeleton CI pipeline
 ```
 
