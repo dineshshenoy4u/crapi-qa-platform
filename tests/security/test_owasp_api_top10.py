@@ -44,9 +44,19 @@ def test_mass_assignment_ignored(auth_client, extra):
     credit_after = auth_client.dashboard().json()["available_credit"]
     assert credit_after == credit_before - 10, f"Extra field {extra} changed the credit"
 
-@pytest.mark.skip(reason="TODO (you): API2 Broken authentication - token handling, lockout, weak reset flow")
-def test_repeated_failed_logins_are_limited(anon_client, registered_user):
+@pytest.mark.xfail(strict=True, raises=AssertionError,reason = "Broken authentication: no rate limiting or "
+                                                              "lockout on login, unlimited password guessing")
+def test_repeated_failed_logins_are_limited(anon_client):
     """Send N wrong-password logins. Does the app ever slow down or lock?"""
+    user = data.new_user()
+    response = anon_client.signup(user["name"], user["email"], user["number"], user["password"])
+    assert response.status_code not in (200, 201), f"Signup for a new user failed. Error : {response.status_code} -- {response.text}"
+    for i in range(1, 11):
+        password = f"wrongpwd{i}"
+        response = anon_client.login(user["email"], password)
+        assert response.status_code == 401, f"Got error : {response.status_code} for password : {password}"
+    response = anon_client.login(user["email"], user["password"])
+    assert response.status_code != 200, "The account was not locked after attempting 10 brute force wrong password access attempt"
 
 @pytest.mark.xfail(strict=True,raises=AssertionError,reason="Excessive Data Exposure: community posts author email and vehicleid to any user")
 def test_responses_do_not_leak_sensitive_fields(auth_client):
