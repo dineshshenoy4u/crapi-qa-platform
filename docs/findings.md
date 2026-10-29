@@ -41,3 +41,16 @@ Optionally use non-guessable ids (UUIDs) as a second layer. The xfail test turns
 - **Fix:** Return only what the UI needs in the author object (nickname, profile picture).
   Never include email or vehicle id in public responses.
 - **Severity:** Medium
+
+## Finding 6: No brute-force protection on login
+- **Test:** test_repeated_failed_logins_are_limited (xfail)
+- **What:** 10 wrong-password logins in a row for one registered account all returned 401 with the same
+  "Invalid Credentials" message. No 429, no lockout and no slowdown. The correct password then logged in
+  normally (200), so the account was never locked.
+  API: POST /identity/api/auth/login
+- **Risk:** An attacker can guess a user's password without limit. Combined with user enumeration
+  (Finding 1) and the weak password policy (Finding 3), this is a realistic path to account takeover.
+- **Fix:** Rate-limit failed logins per account and per IP (for example, 5 failures in 15 minutes returns 429).
+  Use a temporary lockout with increasing delays rather than a permanent lock, so attackers cannot lock
+  real users out. Let users unlock by email verification. Optionally add CAPTCHA or MFA after repeated failures.
+- **Severity:** High
